@@ -7,6 +7,7 @@ const mongoose = require('mongoose');
 const methodOverride = require('method-override');
 const path = require('path');
 const expressLayouts = require('express-ejs-layouts');
+const reportRoute = require('./routes/report');
 
 
 
@@ -85,7 +86,7 @@ app.use((req, res, next) => {
 
 
 
-
+app.use('/report', reportRoute);
 
 
 // 7️⃣ Routes
