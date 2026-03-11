@@ -1,0 +1,74 @@
+<header style="margin-bottom: 20px; border-bottom: 1px solid #ccc; padding: 10px 0;">
+  <nav style="display: flex; justify-content: space-between; align-items: center;">
+    <div>
+      <a href="/" style="margin-right: 15px;">Home</a>
+      <a href="/books" style="margin-right: 15px;">Books Read</a>
+      <a href="/lectures" style="margin-right: 15px;">Lectures Completed</a>
+      <a href="/queue" style="margin-right: 15px;">My Queue</a>
+    </div>
+
+
+
+
+
+    <div style="position: relative;">
+  <% if (currentUser) { %>
+    <div style="cursor:pointer; color: var(--accent); font-weight:bold;" 
+         onclick="document.getElementById('user-menu').classList.toggle('open')">
+      <%= currentUser.username %> ▼
+    </div>
+    <div id="user-menu" 
+         style="
+           display:none;
+           position:absolute;
+           right:0;
+           background:#222;
+           border:1px solid #444;
+           border-radius:8px;
+           padding:10px;
+           margin-top:8px;
+         ">
+      <a href="/account/delete" style="display:block; padding:5px 0; color: red;">Delete Account</a>
+      <a href="/account/change-password" style="display:block; padding:5px 0;">Change Password</a>
+      <a href="/logout" style="display:block; padding:5px 0;">Logout</a>
+    </div>
+
+    <script>
+      document.addEventListener('click', function(e) {
+        const menu = document.getElementById('user-menu');
+        if (!menu) return;
+        if (e.target.closest('#user-menu') || e.target.closest('div[onclick]')) {
+          // Clicked username or menu — do nothing
+          return;
+        }
+        menu.classList.remove('open');
+      });
+
+      // Toggle display when .open class is added
+      const menu = document.getElementById('user-menu');
+      if (menu) {
+        const observer = new MutationObserver(() => {
+          menu.style.display = menu.classList.contains('open') ? 'block' : 'none';
+        });
+        observer.observe(menu, { attributes: true });
+      }
+    </script>
+
+  <% } else { %>
+    <a href="/login">Login</a>
+  <% } %>
+</div>
+
+    
+    
+
+
+
+
+
+
+
+
+
+  </nav>
+</header>

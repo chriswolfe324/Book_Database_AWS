@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= title || "Lectures Completed" %></title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+  <h1>Lectures Completed</h1>
+
+<!-- SEARCH + FILTER BAR -->
+<form method="GET" class="book-filters" style="margin-bottom: 1.5rem;">
+
+  <!-- Search -->
+  <input type="text" name="q" value="<%= q %>" placeholder="Search lectures..." />
+
+  <!-- Genre Filter -->
+  <select name="genre">
+    <option <%= genre==='All'?'selected':'' %>>All</option>
+    <option <%= genre==='Philosophy'?'selected':'' %>>Philosophy</option>
+    <option <%= genre==='History'?'selected':'' %>>History</option>
+    <option <%= genre==='Science'?'selected':'' %>>Science</option>
+    <option <%= genre==='Economics'?'selected':'' %>>Economics</option>
+    <option <%= genre==='Music'?'selected':'' %>>Music</option>
+    <option <%= genre==='Literature'?'selected':'' %>>Literature</option>
+    <option <%= genre==='Other'?'selected':'' %>>Other</option>
+  </select>
+
+  <!-- Sort -->
+  <select name="sort">
+    <option value="dateListened" <%= sort==='dateListened'?'selected':'' %>>Newest listened</option>
+    <option value="-dateListened" <%= sort==='-dateListened'?'selected':'' %>>Oldest listened</option>
+    <option value="title" <%= sort==='title'?'selected':'' %>>Title A→Z</option>
+    <option value="-title" <%= sort==='-title'?'selected':'' %>>Title Z→A</option>
+    <option value="speakerLast,speakerFirst" <%= sort==='speakerLast,speakerFirst'?'selected':'' %>>Speaker A→Z</option>
+    <option value="-speakerLast,-speakerFirst" <%= sort==='-speakerLast,-speakerFirst'?'selected':'' %>>Speaker Z→A</option>
+  </select>
+
+  <button type="submit">Apply</button>
+  <a href="/lectures">Reset</a>
+
+  <a href="/lectures/new" class="btn">Add New Lecture</a>
+</form>
+
+ 
+
+  <% if (lectures.length === 0) { %>
+    <p>No lectures yet.</p>
+  <% } else { %>
+    <table border="1" cellpadding="8">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Speaker</th>
+          <th>Series</th>
+          <th>Duration</th>
+          <th>Genre</th>
+          <th>Date Listened</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% lectures.forEach(lec => { %>
+          <tr>
+  <td><%= lec.title %></td>
+  <td><%= lec.speakerFirst %> <%= lec.speakerLast %></td>
+  <td><%= lec.seriesTitle || '-' %></td>
+  <td><%= lec.duration || '-' %></td>
+  <td><%= lec.genre || '-' %></td>
+  <td><%= lec.dateListened ? lec.dateListened.toDateString() : '-' %></td>
+  <td>
+  <div style="display:flex; gap:8px;">
+  <a class="edit-btn" href="/lectures/<%= lec._id %>/edit">✏️</a>
+
+  <form action="/lectures/<%= lec._id %>?_method=DELETE" method="POST" style="display:inline;">
+    <button class="delete-btn" type="submit" onclick="return confirm('Delete this lecture?');">🗑️</button>
+  </form>
+</div>
+
+
+</td>
+
+</tr>
+
+        <% }) %>
+      </tbody>
+    </table>
+  <% } %>
+</body>
+</html>

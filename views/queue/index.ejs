@@ -1,0 +1,108 @@
+<h1>My Queue</h1>
+
+<!-- SEARCH + FILTER BAR -->
+<form method="GET" class="queue-filters" style="width:100%; margin-bottom:1.5rem;">
+
+  <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+
+    <!-- LEFT SIDE (INPUTS + DROPDOWN + APPLY + RESET) -->
+    <div class="left">
+
+      <input 
+        type="text" 
+        name="q" 
+        value="<%= q %>" 
+        placeholder="Search queue..." 
+        style="width: 220px;"
+      />
+
+      <select name="type">
+        <option <%= type==='All' ? 'selected' : '' %>>All</option>
+        <option value="Book" <%= type==='Book' ? 'selected' : '' %>>Book</option>
+        <option value="Audiobook" <%= type==='Audiobook' ? 'selected' : '' %>>Audiobook</option>
+        <option value="Audio Lecture" <%= type==='Audio Lecture' ? 'selected' : '' %>>Audio Lecture</option>
+      </select>
+
+      <button type="submit" class="btn">Apply</button>
+      <a href="/queue" class="btn btn-small">Reset</a>
+
+    </div>
+
+    <!-- RIGHT SIDE (Add Button) -->
+    <div class="right">
+      <a class="btn" href="/queue/new">Add to Queue</a>
+    </div>
+
+  </div>
+
+</form>
+
+
+
+
+
+
+
+
+
+<table>
+  <tr>
+    <th>Type</th>
+    <th>Title</th>
+    <th>Genre</th>
+    <th>Author / Speaker</th>
+    <th>Series</th>
+    <th>Pages</th>
+    <th>Duration</th>
+    <th>Own?</th>
+    <th></th>
+  </tr>
+
+  <% items.forEach(i => { %>
+    <tr>
+
+      <td><%= i.type %></td>
+
+      <td><%= i.title %></td>
+
+      <td><%= i.genre ? i.genre : '-' %></td>
+
+      <td>
+        <% if (i.type === 'Book' || i.type === 'Audiobook') { %>
+          <%= (i.authorFirstName || '') + ' ' + (i.authorLastName || '') %>
+        <% } else if (i.type === 'Audio Lecture') { %>
+          <%= i.speakerName || '-' %>
+        <% } else { %>
+          -
+        <% } %>
+      </td>
+
+      <td><%= i.seriesTitle || '-' %></td>
+
+      <td>
+        <% if (i.type === 'Book') { %>
+          <%= i.pages || '-' %>
+        <% } else { %>
+          -
+        <% } %>
+      </td>
+
+      <td>
+        <% if (i.type === 'Audio Lecture') { %>
+          <%= i.duration ? (i.duration + ' min') : '-' %>
+        <% } else { %>
+          -
+        <% } %>
+      </td>
+
+      <td><%= i.own ? i.own : '-' %></td>
+
+      <td>
+        <form action="/queue/<%= i._id %>?_method=DELETE" method="POST" style="display:inline;">
+          <button class="delete-btn" type="submit" onclick="return confirm('Remove this item from your queue?');">🗑️</button>
+        </form>
+      </td>
+
+    </tr>
+  <% }) %>
+</table>

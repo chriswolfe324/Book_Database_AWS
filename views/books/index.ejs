@@ -1,0 +1,149 @@
+<h1>Books Read</h1>
+
+
+<!-- ROW 1: Search + Genre + Format + Sort + Limit -->
+<form id="bookFilterForm" method="GET" class="book-filters"
+      style="display:flex; flex-wrap:wrap; gap:1rem; justify-content:flex-start;">
+
+  <input type="text" name="q" value="<%= q %>" placeholder="Search..."
+         style="height:42px;"/>
+
+  <select name="genre" style="height:42px;">
+    <option <%= genre==='All'?'selected':'' %>>All</option>
+    <option <%= genre==='Philosophy'?'selected':'' %>>Philosophy</option>
+    <option <%= genre==='Fiction'?'selected':'' %>>Fiction</option>
+    <option <%= genre==='History'?'selected':'' %>>History</option>
+  </select>
+
+  <select name="format" style="height:42px;">
+    <option <%= format==='All'?'selected':'' %>>All</option>
+    <option value="Book" <%= format==='Book'?'selected':'' %>>Book</option>
+    <option value="AudioBook" <%= format==='AudioBook'?'selected':'' %>>AudioBook</option>
+  </select>
+
+  <select name="sort" style="height:42px;">
+    <option value="dateFinished,-_id" <%= sort==='dateFinished,-_id'?'selected':'' %>>Newest finished</option>
+    <option value="-dateFinished,-_id" <%= sort==='-dateFinished,-_id'?'selected':'' %>>Oldest finished</option>
+    <option value="title" <%= sort==='title'?'selected':'' %>>Title A→Z</option>
+    <option value="-title" <%= sort==='-title'?'selected':'' %>>Title Z→A</option>
+    <option value="authorLast,authorFirst,title" <%= sort==='authorLast,authorFirst,title'?'selected':'' %>>Author A→Z</option>
+    <option value="-authorLast,-authorFirst,title" <%= sort==='-authorLast,-authorFirst,title'?'selected':'' %>>Author Z→A</option>
+    <option value="pages" <%= sort==='pages'?'selected':'' %>>Pages ↑</option>
+    <option value="-pages" <%= sort==='-pages'?'selected':'' %>>Pages ↓</option>
+  </select>
+
+  <select name="limit" style="height:42px;">
+    <option value="10" <%= limit===10?'selected':'' %>>10</option>
+    <option value="20" <%= limit===20?'selected':'' %>>20</option>
+    <option value="50" <%= limit===50?'selected':'' %>>50</option>
+  </select>
+
+<!-- ROW 2: Add New Book (left) AND Apply/Reset (right) -->
+<div style="
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  width:100%;
+  margin-bottom:1rem;
+  flex-wrap:nowrap;
+">
+
+  <!-- LEFT: Add New Book -->
+  <a href="/books/new" class="btn" 
+     style="height:42px; display:flex; align-items:center;">
+    Add New Book
+  </a>
+
+  <!-- RIGHT: Apply + Reset -->
+  <div style="display:flex; gap:1rem; align-items:center;">
+    <button form="bookFilterForm" type="submit" class="btn" style="height:42px;">
+      Apply
+    </button>
+    <a href="/books" class="btn btn-small" style="height:42px;">
+      Reset
+    </a>
+  </div>
+
+</div>
+
+
+
+</form>
+
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<% if (items.length === 0) { %>
+  <p>No books yet.</p>
+<% } else { %>
+  <table border="1" cellpadding="8">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Author</th>
+        <th>Genre</th>
+        <th>Pages</th>
+        <th>Date Finished</th>
+        <th>Format</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% items.forEach(book => { %>
+        <tr>
+          <td><%= book.title %></td>
+          <td><%= book.authorFirst %> <%= book.authorLast %></td>
+          <td><%= book.genre %></td>
+          <td><%= book.pages || '-' %></td>
+          <td><%= book.dateFinished ? book.dateFinished.toDateString() : '-' %></td>
+          <td><%= book.format %></td>
+          <td>
+            <div style="display:flex; gap:8px;">
+  <a class="edit-btn" href="/books/<%= book._id %>/edit">✏️</a>
+
+  <form action="/books/<%= book._id %>?_method=DELETE" method="POST">
+    <button class="delete-btn" type="submit" onclick="return confirm('Delete this book?');">🗑️</button>
+  </form>
+</div>
+
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+
+
+  <% function keep(name, value) { %>
+  <input type="hidden" name="<%= name %>" value="<%= value %>">
+<% } %>
+
+
+  <div class="pagination">
+
+  <form method="GET">
+    <% keep('q', q); keep('genre', genre); keep('format', format); keep('sort', sort); keep('limit', limit); %>
+    <input type="hidden" name="page" value="<%= Math.max(page-1,1) %>">
+    <button <%= page===1?'disabled':'' %>>Prev</button>
+  </form>
+
+  <form method="GET">
+    <% keep('q', q); keep('genre', genre); keep('format', format); keep('sort', sort); keep('limit', limit); %>
+    <input type="hidden" name="page" value="<%= Math.min(page+1,totalPages) %>">
+    <button <%= page===totalPages?'disabled':'' %>>Next</button>
+  </form>
+
+</div>
+<% } %>

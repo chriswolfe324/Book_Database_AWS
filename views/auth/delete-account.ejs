@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Delete Account</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<div class="container">
+  <h1 style="color: red;">Delete Your Account</h1>
+
+  <p><strong>Warning:</strong> This action is permanent. All your books, audiobooks, lectures, and queue items will be deleted forever.</p>
+
+  <% if (error) { %>
+    <p style="color:red; font-weight:bold;"><%= error %></p>
+  <% } %>
+
+  <form action="/account/delete" method="POST">
+    <label>Confirm your password to continue:</label>
+    <input type="password" name="password" required>
+
+    <button class="btn" 
+      style="background:red; margin-top:1rem;"
+      onclick="return confirm('Are you absolutely sure you want to permanently delete your account? This cannot be undone.');">
+      Yes, Delete My Account
+    </button>
+  </form>
+
+  <p style="margin-top:1rem;">
+    <a href="/books">Cancel and go back</a>
+  </p>
+</div>
+
+</body>
+</html>

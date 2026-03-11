@@ -1,0 +1,424 @@
+/* === COLOR PALETTE === */
+:root {
+  --accent: #2E8B57;         /* Rich emerald */
+  --accent-dark: #1f5e3b;    /* Deep emerald */
+  --secondary: #5A5A5A;      /* Warm neutral grey */
+  --text: #F5F5F5;           /* Soft white */
+  --background-dark: #121212;
+  --overlay: rgba(0, 0, 0, 0.7);
+}
+
+/* === BASE PAGE STYLING === */
+body {
+  font-family: 'Poppins', sans-serif;
+  color: var(--text);
+  background:
+    linear-gradient(var(--overlay), var(--overlay)),
+    url('/images/book-bg.png') no-repeat center center fixed;
+  background-size: cover;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* === CONTAINER === */
+.container {
+  width: 90%;
+  max-width: 1000px;
+  background: rgba(18, 18, 18, 0.85);
+  border-radius: 12px;
+  padding: 2rem 3rem;
+  margin: 3rem 0;
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.7);
+}
+
+/* === HEADINGS === */
+h1, h2, h3 {
+  font-family: 'Merriweather', serif;
+  margin-bottom: 1rem;
+}
+
+h1 {
+  font-size: 2.3rem;
+  color: var(--accent);
+  text-align: center;
+  letter-spacing: 1px;
+}
+
+h2 {
+  color: var(--accent);
+  border-bottom: 2px solid var(--accent-dark);
+  padding-bottom: 0.3rem;
+}
+
+h3 {
+  color: var(--text);
+}
+
+/* === TEXT === */
+p, label, input, button {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+/* === NAVIGATION BAR === */
+nav {
+  width: 100%;
+  background: var(--background-dark);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+nav a {
+  color: var(--accent);
+  text-decoration: none;
+  margin: 0 1rem;
+  font-weight: bold;
+  transition: color 0.3s;
+}
+
+nav a:hover {
+  color: var(--text);
+}
+
+/* === BUTTONS === */
+button, .btn {
+  background-color: var(--accent);
+  color: var(--text);
+  border: none;
+  border-radius: 6px;
+  padding: 0.6rem 1.2rem;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s, transform 0.1s;
+}
+
+button:hover, .btn:hover {
+  background-color: var(--accent-dark);
+  transform: scale(1.03);
+}
+
+/* === FORMS === */
+form:not(.book-filters) {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+
+input, textarea, select {
+  padding: 0.5rem;
+  border: 1px solid var(--secondary);
+  border-radius: 5px;
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: 1px solid var(--accent);
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* === BOOK FILTER BAR === */
+.book-filters {
+  display: flex;
+  flex-wrap: wrap;          /* all elements stay in one row */
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.book-filters input[type="text"] {
+  flex: 1;                    /* search bar expands to fill space */
+  min-width: 220px;
+  height: 42px;            /* consistent height */
+}
+
+.book-filters input {
+  height: 42px !important;
+}
+
+.book-filters select {
+  min-width: 160px;
+  height: 42px !important;
+}
+
+.book-filters button {
+  height: 42px !important;
+  background-color: var(--accent);
+  color: var(--text);
+  border: none;
+  border-radius: 6px;
+  padding: 0.6rem 1.4rem;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s, transform 0.1s;
+}
+
+.book-filters button:hover {
+  background-color: var(--accent-dark);
+  transform: scale(1.03);
+}
+
+/* Dropdown readability improvements */
+.book-filters select option {
+  background-color: #2a2a2a;        /* lighter dark background */
+  color: #F5F5F5;                   /* soft white text */
+  padding: 0.4rem;
+}
+
+.book-filters select option:checked,
+.book-filters select option:hover {
+  background-color: var(--accent);  /* emerald highlight */
+  color: #ffffff;                   /* white text */
+  font-weight: bold;
+}
+
+/* Highlight on focus */
+.book-filters input:focus,
+.book-filters select:focus {
+  background-color: rgba(46, 139, 87, 0.2); /* emerald tint */
+  outline: none;
+}
+
+/* === TABLES OR LISTS === */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  color: var(--text);
+}
+
+th, td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--secondary);
+}
+
+th {
+  text-align: left;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+tr:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* === FOOTER === */
+footer {
+  margin-top: auto;
+  padding: 1rem;
+  color: var(--text);
+  text-align: center;
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+/* === UTILITY CLASSES === */
+.center {
+  text-align: center;
+}
+
+.left {
+  text-align: left;
+}
+
+.right {
+  text-align: right;
+}
+
+
+/* === DELETE BUTTON (Red Square with Trash Icon) === */
+.delete-btn {
+  background-color: #E53935;        /* dark red */
+  border: none;
+  border-radius: 6px;
+  width: 38px;                      /* square look */
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+  font-size: 1.2rem;
+  color: white;
+  padding: 0;                       /* remove whitespace */
+}
+
+.delete-btn:hover {
+  background-color: #C62828;        /* darker red */
+  transform: scale(1.04);
+}
+
+
+/* === EDIT BUTTON (Green Square with Pencil Icon) === */
+.edit-btn {
+  background-color: #2E8B57;        /* emerald accent color */
+  border: none;
+  border-radius: 6px;
+  width: 38px;                      /* square */
+  height: 38px;                     /* square */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+  font-size: 1.2rem;
+  color: white;
+  text-decoration: none;            /* remove underline from <a> */
+  padding: 0;                       /* perfect centering */
+}
+
+.edit-btn:hover {
+  background-color: #1f5e3b;        /* darker hover shade */
+  transform: scale(1.05);
+}
+
+
+.pagination {
+  display: flex;
+  justify-content: flex-end;   /* right-aligned */
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.pagination button {
+  height: 28px;                /* shorter height */
+  padding: 0 10px;             /* tighter look */
+  font-size: 0.85rem;
+  border-radius: 5px;
+}
+
+
+/* Make book search bar align with dropdown heights */
+.book-filters input[type="text"] {
+  height: 42px !important;
+  padding: 0 0.75rem !important;   /* remove vertical padding, keep horizontal */
+  box-sizing: border-box;          /* ensures consistent sizing */
+}
+
+
+
+/* Form field alignment for Add/Edit Book pages */
+.form-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.form-row label {
+  width: 160px;  /* ← fixed width based on Author labels */
+  font-weight: bold;
+}
+
+.form-row input,
+.form-row select {
+  flex: 1;
+}
+
+
+/* Make dropdown text black on Add/Edit Book pages */
+form select {
+  color: #000 !important;
+  background-color: #fff !important;
+}
+
+/* And the dropdown options themselves */
+form select option {
+  color: #000 !important;
+}
+
+/* Make calendar picker icon white */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);          /* turns black -> white */
+  opacity: 1;
+  cursor: pointer;
+}
+
+/* For browsers that allow forcing the icon color */
+input[type="date"] {
+  color-scheme: dark;         /* better contrast for dark themes */
+}
+
+
+
+/* Small button for Reset */
+.btn-small {
+  padding: 0.3rem 0.6rem !important;
+  font-size: 0.8rem !important;
+  border-radius: 5px !important;
+}
+
+
+
+
+/* Force dropdown menus to be white with black text */
+select,
+select option {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+/* Some browsers (especially Chrome/Edge) require this */
+select:focus {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+/* Fix for expanded dropdown list in WebKit browsers */
+select::-webkit-list-box {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+/* Extra safety for dark mode interference */
+select::-ms-expand {
+  color: #000000 !important;
+  background-color: #ffffff !important
+}
+
+  /* === UNIFY QUEUE FILTER BAR SIZING === */
+.queue-filters input,
+.queue-filters select,
+.queue-filters button,
+.queue-filters a.btn,
+.queue-filters a.btn-small {
+  height: 42px !important;
+  padding: 0 1rem !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Spread controls evenly */
+.queue-filters .left,
+.queue-filters .right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+
+/* === UNIFY BUTTON HEIGHTS (Books Pagination + Reset) === */
+.book-filters button,
+.book-filters a.btn,
+.book-filters a.btn-small,
+.pagination button {
+  height: 42px !important;
+  padding: 0 1rem !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

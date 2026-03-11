@@ -1,0 +1,53 @@
+<h1>Add a Book</h1>
+
+<form action="/books" method="POST">
+
+  <div class="form-row">
+    <label>Title</label>
+    <input type="text" name="title">
+  </div>
+
+  <div class="form-row">
+    <label>Author (First)</label>
+    <input type="text" name="authorFirst">
+  </div>
+
+  <div class="form-row">
+    <label>Author (Last)</label>
+    <input type="text" name="authorLast">
+  </div>
+
+  <div class="form-row">
+    <label>Pages</label>
+    <input type="number" name="pages" min="0">
+  </div>
+
+  <div class="form-row">
+    <label>Genre</label>
+    <select name="genre">
+      <option value="">(optional)</option>
+      <option>Fiction</option>
+      <option>Economics</option>
+      <option>Philosophy</option>
+      <option>History</option>
+      <option>Science</option>
+      <option>Music</option>
+      <option>Other</option>
+    </select>
+  </div>
+
+  <div class="form-row">
+    <label>Date Finished</label>
+    <input type="date" name="dateFinished">
+  </div>
+
+  <div class="form-row">
+    <label>Format</label>
+    <div>
+      <label><input type="radio" name="format" value="Book" checked> Book</label>
+      <label><input type="radio" name="format" value="AudioBook"> AudioBook</label>
+    </div>
+  </div>
+
+  <button type="submit">Save Book</button>
+</form>
