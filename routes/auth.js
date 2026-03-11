@@ -117,8 +117,6 @@ router.post('/account/delete', async (req, res) => {
 
         const User = require('../models/User');
         const Book = require('../models/Book');
-        const Lecture = require('../models/Lecture');
-        const QueueItem = require('../models/QueueItem');
 
         const user = await User.findById(req.session.userId);
         if (!user) {
@@ -136,8 +134,6 @@ router.post('/account/delete', async (req, res) => {
         // Delete user data
         await Promise.all([
             Book.deleteMany({ user: userId }),
-            Lecture.deleteMany({ user: userId }),
-            QueueItem.deleteMany({ user: userId }),
             User.findByIdAndDelete(userId)
         ]);
 

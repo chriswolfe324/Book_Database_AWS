@@ -7,9 +7,6 @@ const mongoose = require('mongoose');
 const methodOverride = require('method-override');
 const path = require('path');
 const expressLayouts = require('express-ejs-layouts');
-const lectureRoutes = require('./routes/lectures');
-const queueRoutes = require('./routes/queue');
-const QueueItem = require('./models/QueueItem');
 
 
 
@@ -63,8 +60,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Allow method override for PUT/DELETE
 app.use(methodOverride('_method'));
 
-app.use('/lectures', lectureRoutes);
-app.use('/queue', queueRoutes);
+
 
 
 // 5️⃣ Set EJS view engine
@@ -103,37 +99,6 @@ app.get('/', (req, res) => {
 
 const authRouter = require('./routes/auth');
 app.use('/', authRouter);
-
-
-// Show all queue items
-app.get('/queue', async (req, res) => {
-  try {
-    const items = await QueueItem.find().sort({ createdAt: -1 }); // newest first
-    console.log('Loaded queue items:', items.length);
-    res.render('queue/index', { title: 'My Queue', items });
-  } catch (err) {
-    console.error('Error loading queue:', err);
-    res.status(500).send('Server error loading queue');
-  }
-});
-
-app.get('/queue/new', (req, res) => {
-  res.render('queue/new', { title: 'Add to Queue' });
-});
-
-app.post('/queue', async (req, res) => {
-  try {
-    const newItem = new QueueItem(req.body);
-    await newItem.save();
-    console.log('✅ Saved new queue item:', newItem);
-    res.redirect('/queue');
-  } catch (err) {
-    console.error('Error saving queue item:', err);
-    res.status(500).send('Server error saving queue');
-  }
-});
-
-
 
 
 // 8️⃣ Start the server
