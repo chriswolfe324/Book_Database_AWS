@@ -3,7 +3,7 @@ require('dotenv').config();
 
 // 2️⃣ Import packages
 const express = require('express');
-const mongoose = require('mongoose');
+
 const methodOverride = require('method-override');
 const path = require('path');
 const expressLayouts = require('express-ejs-layouts');
@@ -68,10 +68,6 @@ app.use(methodOverride('_method'));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// 6️⃣ Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('✅ Connected to MongoDB'))
-  .catch(err => console.error('MongoDB connection error:', err));
 
 
 

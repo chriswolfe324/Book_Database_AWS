@@ -1,0 +1,96 @@
+Files to upload
+
+1a. app.js
+1b. package.json
+1c. package-lock.json or npm-shrinkwrap.json if you have one
+1d. .env example or the part that shows current DB-related variables only
+1e. All model files in models/: Book.js User.js
+and any other model files used by the app
+1f. All route files that read or write database data:
+routes/books.js
+routes/auth.js
+routes/report.js
+1h. routes/utils/query.js
+1j. All EJS files only if the forms/field names might need to change:
+usually not required for the DB swap, but helpful for full testing
+
+
+
+
+Inventory current Mongo usage
+2c. The PostgreSQL tables need to be: users and books
+2d. I picked plain PostgreSQL with pg for this app because you told me to.
+
+
+
+
+Build the PostgreSQL connection layer
+5a. Create a DB config file such as db.js
+5b. Create a reusable connection or pool
+5c. Add a simple test query to verify the pool works
+5d. Update app.js to load the new DB connection instead of Mongoose
+5e. Make sure startup errors fail clearly
+
+Convert the User model
+6a. Replace the Mongoose User schema with SQL table design
+6b. Create the users table with columns like id, username, password_hash
+6c. Rebuild the user methods you relied on, such as “find by username” and “verify password”
+6d. Decide whether those functions live in models/User.js or a service file
+6e. Test register, login, and password verification
+
+Convert the Book model
+7a. Replace the Mongoose Book schema with SQL table design
+7b. Create the books table with columns for title, author names, pages, genre, date finished, format, and user_id
+7c. Add indexes for the main lookups and sorts
+7d. Recreate model functions for create, list, update, delete
+7e. Test inserting and reading books for one user
+
+Rewrite auth routes for PostgreSQL
+8a. Update register route to insert into users
+8b. Update login route to query PostgreSQL instead of User.findOne
+8c. Update change-password route to read and update from PostgreSQL
+8d. Update delete-account route to delete related books, then delete the user
+8e. Confirm session logic still stores the user id correctly
+
+Rewrite books routes for PostgreSQL
+9a. Replace Book.find, findById, findByIdAndUpdate, and findByIdAndDelete
+9b. Convert search filters into SQL WHERE clauses
+9c. Convert sorting into safe SQL ORDER BY logic
+9d. Convert pagination into LIMIT and OFFSET
+9e. Keep per-user filtering with user_id
+
+Fix layout middleware that loads current user
+10a. Replace User.findById(req.session.userId) in app.js
+10b. Swap it for a PostgreSQL lookup by user id
+10c. Set res.locals.currentUser exactly like now so your EJS files still work
+10d. Test login, page refresh, logout, and protected routes
+
+Create the SQL schema and bootstrap scripts
+11a. Write the CREATE TABLE statements
+11b. Add foreign key from books.user_id to users.id
+11c. Add indexes for username, user/title, user/genre, and date sorting
+11d. Create a script or SQL file to initialize the database quickly
+11e. Run it and verify tables exist
+
+Clean up query helpers
+12a. Keep your pagination helper if you want
+12b. Review sort parsing so only allowed columns can be sorted
+12c. Prevent SQL injection by parameterizing values
+12d. Add a mapping from UI sort strings to safe SQL column names
+12e. Retest filter, sort, and page navigation
+
+Full app testing pass
+13a. Register a user
+13b. Log in
+13c. Add a book
+13d. Edit a book
+13e. Delete a book
+13f. Change password
+13g. Delete account
+13h. Confirm one user cannot see another user’s books
+
+Final cleanup
+14a. Remove leftover Mongo comments, imports, and packages
+14b. Update .env.example
+14c. Update README with PostgreSQL setup steps
+14d. Save this as the new baseline before adding RDS later
