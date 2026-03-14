@@ -1,6 +1,6 @@
 <h1>Edit Book</h1>
 
-<form action="/books/<%= book._id %>?_method=PUT" method="POST">
+<form action="/books/<%= book.id %>?_method=PUT" method="POST">
 
   <div class="form-row">
     <label>Title</label>
@@ -9,12 +9,12 @@
 
   <div class="form-row">
     <label>Author (First)</label>
-    <input type="text" name="authorFirst" value="<%= book.authorFirst %>">
+    <input type="text" name="authorFirst" value="<%= book.author_first %>">
   </div>
 
   <div class="form-row">
     <label>Author (Last)</label>
-    <input type="text" name="authorLast" value="<%= book.authorLast %>">
+    <input type="text" name="authorLast" value="<%= book.author_last %>">
   </div>
 
   <div class="form-row">
@@ -39,16 +39,16 @@
   <div class="form-row">
     <label>Date Finished</label>
     <input type="date" name="dateFinished"
-           value="<%= book.dateFinished ? book.dateFinished.toISOString().split('T')[0] : '' %>">
+           value="<%= book.date_finished ? book.date_finished.toISOString().split('T')[0] : '' %>">
   </div>
 
   <div class="form-row">
     <label>Format</label>
     <div>
-      <label><input type="radio" name="format" value="Book" 
+      <label><input type="radio" name="format" value="Book"
         <%= book.format === 'Book' ? 'checked' : '' %>> Book</label>
 
-      <label><input type="radio" name="format" value="AudioBook" 
+      <label><input type="radio" name="format" value="AudioBook"
         <%= book.format === 'AudioBook' ? 'checked' : '' %>> AudioBook</label>
     </div>
   </div>

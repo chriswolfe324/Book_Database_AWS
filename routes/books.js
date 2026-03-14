@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Book = require('../models/Book');
 const { parseSort, getPagination } = require('./utils/query');
+const pool = require('../db');
 
 function requireLogin(req, res, next) {
     if (!req.session.userId) {
@@ -23,18 +24,17 @@ router.post('/', async (req, res) => {
   try {
     const userId = req.session.userId;
 
-    const newBook = new Book({
-      title: req.body.title,
-      authorFirst: req.body.authorFirst,
-      authorLast: req.body.authorLast,
-      pages: req.body.pages,
-      genre: req.body.genre,
-      dateFinished: req.body.dateFinished,
-      format: req.body.format,
-      user: userId, // ✅ add this line (must match your filter)
-    });
+      await Book.createBook({
+        title: req.body.title,
+        authorFirst: req.body.authorFirst,
+        authorLast: req.body.authorLast,
+        pages: req.body.pages,
+        genre: req.body.genre,
+        dateFinished: req.body.dateFinished,
+        format: req.body.format,
+        userId: userId
+      });
 
-    await newBook.save();
       console.log('Book saved for user:', userId);
       res.redirect('/books');
   } catch (err) {
@@ -53,50 +53,80 @@ router.post('/', async (req, res) => {
 // Show all books
 router.get('/', async (req, res) => {
   try {
-    const userId = req.session.userId; // or however you store it
-    const { q, genre, format, sort } = req.query;
-    const { page, limit, skip } = getPagination(req.query);
+    const userId = req.session.userId;
+    const { q, genre, format, sort, page = 1 } = req.query;
 
-    const filter = { user: userId }; // ensure per-user data
+    let orderBy = 'date_finished DESC, id DESC';
 
-    // simple search you already had — preserving it
+    if (sort === 'title') orderBy = 'title ASC';
+    if (sort === '-title') orderBy = 'title DESC';
+    if (sort === 'author') orderBy = 'author_last ASC, author_first ASC';
+    if (sort === '-author') orderBy = 'author_last DESC, author_first DESC';
+    if (sort === 'dateFinished') orderBy = 'date_finished ASC';
+    if (sort === '-dateFinished') orderBy = 'date_finished DESC';
+
+    const limit = 10;
+    const offset = (page - 1) * limit;
+
+    let where = ['user_id = $1'];
+    let values = [userId];
+    let index = 2;
+
     if (q && q.trim()) {
-      filter.$or = [
-        { title:   { $regex: q, $options: 'i' } },
-        { authorFirst: { $regex: q, $options: 'i' } },
-        { authorLast:  { $regex: q, $options: 'i' } },
-        { genre:   { $regex: q, $options: 'i' } },
-      ];
+      where.push(`(
+        title ILIKE $${index}
+        OR author_first ILIKE $${index}
+        OR author_last ILIKE $${index}
+        OR genre ILIKE $${index}
+      )`);
+      values.push(`%${q}%`);
+      index++;
     }
 
-    if (genre && genre !== 'All') filter.genre = genre;
-    if (format && format !== 'All') filter.format = format;
+    if (genre && genre !== 'All') {
+      where.push(`genre = $${index}`);
+      values.push(genre);
+      index++;
+    }
 
-    const sortObj = parseSort(sort);
+    if (format && format !== 'All') {
+      where.push(`format = $${index}`);
+      values.push(format);
+      index++;
+    }
 
-    const [items, total] = await Promise.all([
-      Book.find(filter).sort(sortObj).skip(skip).limit(limit),
-      Book.countDocuments(filter)
-    ]);
+    const query = `
+      SELECT *
+      FROM books
+      WHERE ${where.join(' AND ')}
+      ORDER BY ${orderBy}
+      LIMIT ${limit}
+      OFFSET ${offset}
+    `;
 
-    console.log('Filter being used:', filter);
-    console.log('Books found:', items.length);
+    const result = await pool.query(query, values);
 
+    const countResult = await pool.query(
+      `SELECT COUNT(*) FROM books WHERE ${where.join(' AND ')}`,
+      values
+    );
 
+    const total = Number(countResult.rows[0].count);
     const totalPages = Math.max(Math.ceil(total / limit), 1);
 
     res.render('books/index', {
       title: 'Books Read',
-      items,
+      items: result.rows,
       total,
-      page,
       totalPages,
+      page: Number(page) || 1,
       limit,
       q: q || '',
       genre: genre || 'All',
       format: format || 'All',
-      sort: sort || 'dateFinished,-_id', // reflect default
+      sort: sort || ''
     });
+
   } catch (err) {
     console.error(err);
     res.status(500).send('Error loading books');
@@ -112,7 +142,7 @@ router.get('/', async (req, res) => {
 //Show edit form for one book
 router.get('/:id/edit', async (req, res) => {
     try {
-        const book = await Book.findById(req.params.id);
+        const book = await Book.getBookById(req.params.id);
         if (!book) {
             return res.status(404).send('Book not found');
         }
@@ -131,23 +161,23 @@ router.get('/:id/edit', async (req, res) => {
 
 // Handle edit form submission
 router.put('/:id', async (req, res) => {
-    try {
-      await Book.findByIdAndUpdate(req.params.id, {
-        title: req.body.title,
-        authorFirst: req.body.authorFirst,
-        authorLast: req.body.authorLast,
-        pages: req.body.pages,
-        genre: req.body.genre,
-        dateFinished: req.body.dateFinished,
-        format: req.body.format
-      });
-      console.log(`✏️ Updated book with id: ${req.params.id}`);
-      res.redirect('/books');
-    } catch (err) {
-      console.error(' Error updating book:', err);
-      res.status(500).send('Something went wrong while updating.');
-    }
-  });
+  try {
+    await Book.updateBook(req.params.id, {
+      title: req.body.title,
+      authorFirst: req.body.authorFirst,
+      authorLast: req.body.authorLast,
+      pages: req.body.pages,
+      genre: req.body.genre,
+      dateFinished: req.body.dateFinished,
+      format: req.body.format
+    });
+    console.log(`✏️ Updated book with id: ${req.params.id}`);
+    res.redirect('/books');
+  } catch (err) {
+    console.error(' Error updating book:', err);
+    res.status(500).send('Something went wrong while updating.');
+  }
+});
   
 
 
@@ -157,14 +187,14 @@ router.put('/:id', async (req, res) => {
 
 //Delete a book
 router.delete('/:id', async (req, res) => {
-    try {
-        await Book.findByIdAndDelete(req.params.id);
-        console.log(`Deleted book with id: ${req.params.id}`);
-        res.redirect('/books');
-    } catch (err) {
-        console.error ('Error deleting book', err);
-        res.status(500).send('Something went wrong while deleting the book.');;
-    }
+  try {
+    await Book.deleteBook(req.params.id);
+    console.log(`Deleted book with id: ${req.params.id}`);
+    res.redirect('/books');
+  } catch (err) {
+    console.error('Error deleting book', err);
+    res.status(500).send('Something went wrong while deleting the book.');
+  }
 });
 
 

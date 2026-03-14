@@ -1,28 +1,62 @@
-const mongoose = require('mongoose');
+const pool = require('../db');
 
-const bookSchema = new mongoose.Schema({
-    title: { type: String },
-    authorFirst: { type: String },
-    authorLast: { type: String },
-    pages: { type: Number },
-    genre: { 
-        type: String,
-        enum: ['Fiction', 'Economics', 'Philosophy', 'History', 'Science', 'Music', 'Other']
-    },
-    dateFinished: { type: Date },
-    format: { type: String, enum: ['AudioBook', 'Book'], default: 'AudioBook'},
-    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
-}, { timestamps: true});
+async function createBook({ title, authorFirst, authorLast, pages, genre, dateFinished, format, userId }) {
+  const result = await pool.query(
+    `INSERT INTO books
+      (title, author_first, author_last, pages, genre, date_finished, format, user_id)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+     RETURNING *`,
+    [title, authorFirst, authorLast, pages, genre, dateFinished, format, userId]
+  );
+  return result.rows[0];
+}
 
+async function getBooksByUser(userId) {
+  const result = await pool.query(
+    `SELECT * FROM books
+     WHERE user_id = $1
+     ORDER BY date_finished DESC, id DESC`,
+    [userId]
+  );
+  return result.rows;
+}
 
+async function getBookById(id) {
+  const result = await pool.query(
+    'SELECT * FROM books WHERE id = $1',
+    [id]
+  );
+  return result.rows[0];
+}
 
-// After schema definition:
-bookSchema.index({ user: 1, title: 1 });
-bookSchema.index({ user: 1, authorLast: 1, authorFirst: 1 });
-bookSchema.index({ user: 1, genre: 1 });
-bookSchema.index({ user: 1, dateFinished: -1 });
+async function updateBook(id, { title, authorFirst, authorLast, pages, genre, dateFinished, format }) {
+  const result = await pool.query(
+    `UPDATE books
+     SET title = $1,
+         author_first = $2,
+         author_last = $3,
+         pages = $4,
+         genre = $5,
+         date_finished = $6,
+         format = $7
+     WHERE id = $8
+     RETURNING *`,
+    [title, authorFirst, authorLast, pages, genre, dateFinished, format, id]
+  );
+  return result.rows[0];
+}
 
+async function deleteBook(id) {
+  await pool.query(
+    'DELETE FROM books WHERE id = $1',
+    [id]
+  );
+}
 
-
-
-module.exports = mongoose.model('Book', bookSchema);
+module.exports = {
+  createBook,
+  getBooksByUser,
+  getBookById,
+  updateBook,
+  deleteBook
+};

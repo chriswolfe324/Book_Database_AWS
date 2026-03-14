@@ -1,6 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const User = require('../models/User');
+const pool = require('../db');
 const router = express.Router();
 
 //Show registration form
@@ -13,9 +14,13 @@ router.post('/register', async (req, res) => {
     try {
         const { username, password } = req.body;
         const hash = await bcrypt.hash(password, 10);
-        const user = new User({ username, passwordHash: hash });
-        await user.save();
-        res.redirect('/login');
+
+await pool.query(
+  'INSERT INTO users (username, password_hash) VALUES ($1, $2)',
+  [username, hash]
+);
+
+res.redirect('/login');
     } catch (err) {
         console.error('Error registering user:', err);
         res.send('Registration failed (username may already exist).');
@@ -32,17 +37,17 @@ router.get('/login', (req, res) => {
 router.post('/login', async (req, res) => {
     const { username, password } = req.body;
 
-    const user = await User.findOne({ username });
+    const user = await User.findByUsername(username);
     if (!user) {
     return res.render('auth/login', { error: "User not found" });
     }
-    const valid = await user.verifyPassword(password);
+    const valid = await User.verifyPassword(user, password);
     if (!valid) {
     return res.render('auth/login', { error: "Incorrect password" });
 }
 
 
-    req.session.userId = user._id;
+    req.session.userId = user.id;
     res.redirect('/books');
 });
 
@@ -60,46 +65,51 @@ router.get('/logout', (req, res) => {
 
 
 
+router.get('/account/change-password', (req, res) => {
+  if (!req.session.userId) return res.redirect('/login');
 
-
-// Show Change Password Form
-router.get('/account/change-password', async (req, res) => {
-    if (!req.session.userId) return res.redirect('/login');
-
-    res.render('auth/change-password', { error: null, success: null });
+  res.render('auth/change-password', { error: null, success: null });
 });
 
-// Handle Change Password
+// Show Change Password Form
 router.post('/account/change-password', async (req, res) => {
-    try {
-        if (!req.session.userId) return res.redirect('/login');
+  try {
+    if (!req.session.userId) return res.redirect('/login');
 
-        const { currentPassword, newPassword, confirmPassword } = req.body;
-        const user = await User.findById(req.session.userId);
+    const { currentPassword, newPassword, confirmPassword } = req.body;
 
-        if (!user) return res.render('auth/change-password', { error: "User not found.", success: null });
+    const result = await pool.query(
+      'SELECT * FROM users WHERE id = $1',
+      [req.session.userId]
+    );
 
-        // Check old password
-        const valid = await user.verifyPassword(currentPassword);
-        if (!valid) {
-            return res.render('auth/change-password', { error: "Incorrect current password.", success: null });
-        }
+    const user = result.rows[0];
 
-        // Confirm new password match
-        if (newPassword !== confirmPassword) {
-            return res.render('auth/change-password', { error: "New passwords do not match.", success: null });
-        }
-
-        // Save new password
-        const bcrypt = require('bcrypt');
-        user.passwordHash = await bcrypt.hash(newPassword, 10);
-        await user.save();
-
-        res.render('auth/change-password', { error: null, success: "Password updated successfully!" });
-    } catch (err) {
-        console.error(err);
-        res.render('auth/change-password', { error: "Something went wrong.", success: null });
+    if (!user) {
+      return res.render('auth/change-password', { error: "User not found.", success: null });
     }
+
+    const valid = await User.verifyPassword(user, currentPassword);
+    if (!valid) {
+      return res.render('auth/change-password', { error: "Incorrect current password.", success: null });
+    }
+
+    if (newPassword !== confirmPassword) {
+      return res.render('auth/change-password', { error: "New passwords do not match.", success: null });
+    }
+
+    const newHash = await bcrypt.hash(newPassword, 10);
+
+    await pool.query(
+      'UPDATE users SET password_hash = $1 WHERE id = $2',
+      [newHash, req.session.userId]
+    );
+
+    res.render('auth/change-password', { error: null, success: "Password updated successfully!" });
+  } catch (err) {
+    console.error(err);
+    res.render('auth/change-password', { error: "Something went wrong.", success: null });
+  }
 });
 
 
@@ -112,46 +122,41 @@ router.get('/account/delete', (req, res) => {
 
 // Handle Account Deletion
 router.post('/account/delete', async (req, res) => {
-    try {
-        if (!req.session.userId) return res.redirect('/login');
+  try {
+    if (!req.session.userId) return res.redirect('/login');
 
-        const User = require('../models/User');
-        const Book = require('../models/Book');
+    const result = await pool.query(
+      'SELECT * FROM users WHERE id = $1',
+      [req.session.userId]
+    );
 
-        const user = await User.findById(req.session.userId);
-        if (!user) {
-            return res.render('auth/delete-account', { error: "User not found." });
-        }
+    const user = result.rows[0];
 
-        // Confirm password
-        const valid = await user.verifyPassword(req.body.password);
-        if (!valid) {
-            return res.render('auth/delete-account', { error: "Incorrect password." });
-        }
-
-        const userId = user._id;
-
-        // Delete user data
-        await Promise.all([
-            Book.deleteMany({ user: userId }),
-            User.findByIdAndDelete(userId)
-        ]);
-
-        // Destroy session
-        req.session.destroy(() => {
-            res.redirect('/register');   // or '/' if you prefer
-        });
-
-    } catch (err) {
-        console.error("Error deleting user account:", err);
-        res.render('auth/delete-account', {
-            error: "Something went wrong. Please try again."
-        });
+    if (!user) {
+      return res.render('auth/delete-account', { error: "User not found." });
     }
+
+    const valid = await User.verifyPassword(user, req.body.password);
+    if (!valid) {
+      return res.render('auth/delete-account', { error: "Incorrect password." });
+    }
+
+    const userId = req.session.userId;
+
+    await pool.query('DELETE FROM books WHERE user_id = $1', [userId]);
+    await pool.query('DELETE FROM users WHERE id = $1', [userId]);
+
+    req.session.destroy(() => {
+      res.redirect('/register');
+    });
+
+  } catch (err) {
+    console.error('Error deleting user account:', err);
+    res.render('auth/delete-account', {
+      error: "Something went wrong. Please try again."
+    });
+  }
 });
-
-
-
 
 
 

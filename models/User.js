@@ -1,14 +1,19 @@
-const mongoose = require('mongoose');
+const pool = require('../db');
 const bcrypt = require('bcrypt');
 
-const userSchema = new mongoose.Schema({
-    username: { type: String, unique: true, required: true },
-    passwordHash: { type: String, required: true }
-});
+async function findByUsername(username) {
+  const result = await pool.query(
+    'SELECT * FROM users WHERE username = $1',
+    [username]
+  );
+  return result.rows[0];
+}
 
-// Method to check password
-userSchema.methods.verifyPassword = function (password) {
-    return bcrypt.compare(password, this.passwordHash);
+async function verifyPassword(user, password) {
+  return bcrypt.compare(password, user.password_hash);
+}
+
+module.exports = {
+  findByUsername,
+  verifyPassword
 };
-
-module.exports = mongoose.model('User', userSchema);

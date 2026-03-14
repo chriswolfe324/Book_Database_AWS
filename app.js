@@ -1,22 +1,21 @@
-// 1️⃣ Load environment variables first
+// Load environment variables first
 require('dotenv').config();
 
-// 2️⃣ Import packages
+//  Import packages
 const express = require('express');
 
 const methodOverride = require('method-override');
 const path = require('path');
 const expressLayouts = require('express-ejs-layouts');
 const reportRoute = require('./routes/report');
-
-
-
 const session = require('express-session');
 
-// 3️⃣ Initialize the app
+const pool = require('./db');
+
+// Initialize the app
 const app = express();
 
-// 4️⃣ Middleware
+// Middleware
 // Parse form data and JSON
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -30,29 +29,24 @@ app.set('layout', 'layouts/main');  //default Layout file path
 
 
 
-
-
 // Make Logged-in user info available in all EJS templates
-app.use((req, res, next) => {
+app.use(async (req, res, next) => {
   res.locals.currentUser = null;
+
   if (req.session.userId) {
-    const User = require('./models/User');
-    User.findById(req.session.userId)
-      .then(user => {
-        res.locals.currentUser = user;
-        next();
-      })
-      .catch(() => next());
-  } else {
-    next();
+    try {
+      const result = await pool.query(
+        'SELECT * FROM users WHERE id = $1',
+        [req.session.userId]
+      );
+
+      res.locals.currentUser = result.rows[0] || null;
+    } catch (err) {
+      console.error(err);
+    }
   }
+  next();
 });
-
-
-
-
-
-
 
 
 // Static files (CSS, client-side JS, etc.)
@@ -62,15 +56,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(methodOverride('_method'));
 
 
-
-
-// 5️⃣ Set EJS view engine
+// Set EJS view engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
-
-
-
-
 
 
 
@@ -85,7 +73,7 @@ app.use((req, res, next) => {
 app.use('/report', reportRoute);
 
 
-// 7️⃣ Routes
+// Routes
 const booksRouter = require('./routes/books');
 app.use('/books', booksRouter);
 
@@ -98,7 +86,7 @@ const authRouter = require('./routes/auth');
 app.use('/', authRouter);
 
 
-// 8️⃣ Start the server
+// Start the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

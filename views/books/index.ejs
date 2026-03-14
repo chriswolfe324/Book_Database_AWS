@@ -8,19 +8,6 @@
   <input type="text" name="q" value="<%= q %>" placeholder="Search..."
          style="height:42px;"/>
 
-  <select name="genre" style="height:42px;">
-    <option <%= genre==='All'?'selected':'' %>>All</option>
-    <option <%= genre==='Philosophy'?'selected':'' %>>Philosophy</option>
-    <option <%= genre==='Fiction'?'selected':'' %>>Fiction</option>
-    <option <%= genre==='History'?'selected':'' %>>History</option>
-  </select>
-
-  <select name="format" style="height:42px;">
-    <option <%= format==='All'?'selected':'' %>>All</option>
-    <option value="Book" <%= format==='Book'?'selected':'' %>>Book</option>
-    <option value="AudioBook" <%= format==='AudioBook'?'selected':'' %>>AudioBook</option>
-  </select>
-
   <select name="sort" style="height:42px;">
     <option value="dateFinished,-_id" <%= sort==='dateFinished,-_id'?'selected':'' %>>Newest finished</option>
     <option value="-dateFinished,-_id" <%= sort==='-dateFinished,-_id'?'selected':'' %>>Oldest finished</option>
@@ -30,12 +17,6 @@
     <option value="-authorLast,-authorFirst,title" <%= sort==='-authorLast,-authorFirst,title'?'selected':'' %>>Author Z→A</option>
     <option value="pages" <%= sort==='pages'?'selected':'' %>>Pages ↑</option>
     <option value="-pages" <%= sort==='-pages'?'selected':'' %>>Pages ↓</option>
-  </select>
-
-  <select name="limit" style="height:42px;">
-    <option value="10" <%= limit===10?'selected':'' %>>10</option>
-    <option value="20" <%= limit===20?'selected':'' %>>20</option>
-    <option value="50" <%= limit===50?'selected':'' %>>50</option>
   </select>
 
 <!-- ROW 2: Add New Book (left) AND Apply/Reset (right) -->
@@ -75,17 +56,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 <% if (items.length === 0) { %>
   <p>No books yet.</p>
 <% } else { %>
@@ -105,16 +75,16 @@
       <% items.forEach(book => { %>
         <tr>
           <td><%= book.title %></td>
-          <td><%= book.authorFirst %> <%= book.authorLast %></td>
+          <td><%= book.author_first %> <%= book.author_last %></td>
           <td><%= book.genre %></td>
           <td><%= book.pages || '-' %></td>
-          <td><%= book.dateFinished ? book.dateFinished.toDateString() : '-' %></td>
+          <td><%= book.date_finished ? book.date_finished.toDateString() : '-' %></td>
           <td><%= book.format %></td>
           <td>
             <div style="display:flex; gap:8px;">
-  <a class="edit-btn" href="/books/<%= book._id %>/edit">✏️</a>
+  <a class="edit-btn" href="/books/<%= book.id %>/edit">✏️</a>
 
-  <form action="/books/<%= book._id %>?_method=DELETE" method="POST">
+  <form action="/books/<%= book.id %>?_method=DELETE" method="POST">
     <button class="delete-btn" type="submit" onclick="return confirm('Delete this book?');">🗑️</button>
   </form>
 </div>
@@ -133,6 +103,12 @@
 
   <div class="pagination">
 
+    <select name="limit" style="height:42px;">
+      <option value="10" <%= limit===10?'selected':'' %>>10</option>
+      <option value="20" <%= limit===20?'selected':'' %>>20</option>
+      <option value="50" <%= limit===50?'selected':'' %>>50</option>
+    </select>
+
   <form method="GET">
     <% keep('q', q); keep('genre', genre); keep('format', format); keep('sort', sort); keep('limit', limit); %>
     <input type="hidden" name="page" value="<%= Math.max(page-1,1) %>">
@@ -144,6 +120,7 @@
     <input type="hidden" name="page" value="<%= Math.min(page+1,totalPages) %>">
     <button <%= page===totalPages?'disabled':'' %>>Next</button>
   </form>
+
 
 </div>
 <% } %>
