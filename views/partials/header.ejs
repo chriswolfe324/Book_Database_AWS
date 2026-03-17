@@ -3,10 +3,11 @@
     <div>
       <a href="/" style="margin-right: 15px;">Home</a>
       <a href="/books" style="margin-right: 15px;">Books Read</a>
-      <a href="/report/reading-history">Generate Report</a>
+      <form action="/report/reading-history" method="POST" style="display:inline;">
+        <input type="hidden" name="reportType" value="reading-history">
+        <button type="submit">Generate Report</button>
+      </form>
     </div>
-
-
 
 
 
