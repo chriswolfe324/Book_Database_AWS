@@ -5,6 +5,8 @@ require('dotenv').config();
 const express = require('express');
 
 const methodOverride = require('method-override');
+const { LambdaClient } = require("@aws-sdk/client-lambda");
+const lambda = new LambdaClient({ region: "us-east-1" });
 const path = require('path');
 const expressLayouts = require('express-ejs-layouts');
 const reportRoute = require('./routes/report');
