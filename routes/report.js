@@ -21,7 +21,12 @@ router.post('/reading-history', async (req, res) => {
 
     const response = await lambda.send(command);
     console.log("Lambda status code:", response.StatusCode);
-    res.send('Report generation started successfully.');
+
+    res.render ('report/status', {
+      message: 'Report generation started successfully. Your report will be available shortly.'
+    });
+
+
   } catch (err) {
     console.error(err);
     res.status(500).send('Error starting report job.');
