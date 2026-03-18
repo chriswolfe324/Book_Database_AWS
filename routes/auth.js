@@ -22,7 +22,8 @@ await pool.query(
 
 res.redirect('/login');
     } catch (err) {
-        console.error('Error registering user:', err);
+        console.error('FULL ERROR', err);
+        console.error('STACK:', err.stack);
         res.send('Registration failed (username may already exist).');
     }
 });
