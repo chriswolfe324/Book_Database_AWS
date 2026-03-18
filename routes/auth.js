@@ -11,6 +11,7 @@ router.get('/register', (req, res) => {
 
 // Handle Registration
 router.post('/register', async (req, res) => {
+  
     try {
         const { username, password } = req.body;
         const hash = await bcrypt.hash(password, 10);
